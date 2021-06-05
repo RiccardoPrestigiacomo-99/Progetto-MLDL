@@ -31,8 +31,6 @@ def get_rebalancing(rebalancing=None):
     return rebalancing
 
 
-# feature size: 2048 (currently)
-# n_classes: 10 => 100
 class LWF(nn.Module):
   def __init__(self, feature_size, n_classes, BATCH_SIZE, WEIGHT_DECAY, LR, GAMMA, NUM_EPOCHS, DEVICE,MILESTONES,MOMENTUM, \
       reverse_index = None, class_loss_criterion='bce', dist_loss_criterion='bce', loss_rebalancing='auto', lambda0=1):
@@ -98,12 +96,7 @@ class LWF(nn.Module):
         return preds    
 
   def update_representation(self, dataset, new_classes):
-    #previous_model = copy.deepcopy(self)
-    #previous_model.to(self.DEVICE)
-
-    # 3 - increment classes
-    #          (add output nodes)
-    #          (update n_classes)
+    
     gc.collect()
 
     self.increment_classes(len(new_classes))
@@ -122,7 +115,6 @@ class LWF(nn.Module):
     criterion = utils.getLossCriterion()
 
     if self.n_known > 0:
-        #old_net = copy.deepcopy(self.feature_extractor) #copy network before training
         old_net = copy.deepcopy(self) #test
 
     cudnn.benchmark # Calling this optimizes runtime
@@ -160,34 +152,10 @@ class LWF(nn.Module):
         scheduler.step()
         print("LOSS: ", loss.item(), 'class loss', class_loss, 'dist loss', dist_loss.item() if dist_loss is not None else dist_loss)
 
-        #     labels_one_hot = utils._one_hot_encode(labels,self.n_classes, self.reverse_index, device=self.DEVICE)
-        #     # test
-        #     #labels_one_hot = nn.functional.one_hot(labels, self.n_classes)
-        #     labels_one_hot.type_as(outputs)
-
-        #     # Classification loss for new classes            
-        #     if self.n_known == 0:
-        #         loss = criterion(outputs, labels_one_hot)
-        #     elif self.n_known > 0:
-            
-        #         labels_one_hot = labels_one_hot.type_as(outputs)[:,self.n_known:]
-        #         out_old = Variable(torch.sigmoid(old_net(images))[:,:self.n_known],requires_grad = False)
-                
-        #         #[outputold, onehot_new]
-        #         target = torch.cat((out_old, labels_one_hot),dim=1)
-        #         loss = criterion(outputs,target)
-
-        #     loss.backward()
-        #     optimizer.step()
-
-        # scheduler.step()
-        # print("LOSS: ",loss)
-
     gc.collect()
     del net
     torch.no_grad()
     torch.cuda.empty_cache()
-
 
 
   def build_loss(self, class_loss_criterion, dist_loss_criterion, rebalancing=None, lambda0=1):
