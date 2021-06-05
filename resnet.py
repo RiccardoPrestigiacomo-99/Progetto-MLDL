@@ -100,7 +100,7 @@ class Downsample(nn.Module):
 
 class CifarResNet(nn.Module):
 
-    def __init__(self, block=BasicBlock, depth=32, num_classes=10, channels=3):
+    def __init__(self, block=BasicBlock, depth=32, num_classes=0, channels=3):
 
         super(CifarResNet, self).__init__()
 
